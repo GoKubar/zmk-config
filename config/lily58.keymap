@@ -1,14 +1,14 @@
 /*
- * Lily58 — Gallium Colstag / Programmer / Vim
+ * Lily58 — QWERTY / Corne-style Programmer / Vim
  *
  * Design goals:
- * - Preserve Gallium's alpha + base punctuation positions
- * - Preserve useful Lily58 physical keys instead of forcing a 36-key layout
+ * - Standard QWERTY alphas for maximum cross-device fluency
+ * - Corne-style 3x5 symbol/navigation philosophy; Lily58 extras are conveniences
  * - Dedicated thumb Space / Backspace / Enter
  * - Dedicated modifiers; no HRMs initially
  * - NAV with arrows on physical QWERTY H/J/K/L
- * - Programming symbols + right-hand numpad
- * - Explicit optional delimiter-pair macros
+ * - Programming symbols + right-hand numpad with no dependence on the number row
+ * - Delimiter pairs arranged symmetrically on the symbol layer
  * - Tri-layer FN with Bluetooth/F/media controls
  * - Plain QWERTY gaming layer with no layer-tap leakage
  * - Preserve rotary encoder volume on every layer
@@ -25,46 +25,6 @@
 #define GAME 4
 
 / {
-    macros {
-        /*
-         * Convenience pair macros. Individual delimiters remain available.
-         * These emit opener + closer + Left, e.g. () then cursor inside.
-         * In Neovim with an autopairs plugin, use the individual opener unless
-         * you deliberately want the keyboard macro.
-         */
-        pair_paren: pair_paren {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            wait-ms = <10>;
-            tap-ms = <10>;
-            bindings = <&kp LPAR &kp RPAR &kp LEFT>;
-        };
-
-        pair_bracket: pair_bracket {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            wait-ms = <10>;
-            tap-ms = <10>;
-            bindings = <&kp LBKT &kp RBKT &kp LEFT>;
-        };
-
-        pair_brace: pair_brace {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            wait-ms = <10>;
-            tap-ms = <10>;
-            bindings = <&kp LBRC &kp RBRC &kp LEFT>;
-        };
-
-        pair_angle: pair_angle {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            wait-ms = <10>;
-            tap-ms = <10>;
-            bindings = <&kp LT &kp GT &kp LEFT>;
-        };
-    };
-
     /*
      * SYM + NAV -> FN. FN is a higher layer than either input layer, as ZMK's
      * conditional-layer design expects.
@@ -82,27 +42,26 @@
         compatible = "zmk,keymap";
 
         /*
-         * BASE — Gallium Colstag
+         * BASE — standard QWERTY
          *
          * |  `  | 1 | 2 | 3 | 4 | 5 |                 | 6 | 7 | 8 | 9 | 0 | - |
-         * | TAB | B | L | D | C | V |                 | J | Y | O | U | , | \ |
-         * | ESC | N | R | T | S | G |                 | P | H | A | E | I | / |
-         * | SFT | X | Q | M | W | Z | [ |         | ] | K | F | ' | ; | . |SFT|
+         * | TAB | Q | W | E | R | T |                 | Y | U | I | O | P | \ |
+         * | ESC | A | S | D | F | G |                 | H | J | K | L | ; | / |
+         * | SFT | Z | X | C | V | B | [ |         | ] | N | M | , | . | ' |SFT|
          *                    |CTL|SYM|ALT|SPC|     |BSP|ENT|NAV|GUI|
          *
          * Notes:
-         * - / is kept in Gallium's base punctuation block.
          * - Enter moves from the outer pinky column to a right thumb.
-         * - [] remain on the Lily's inner keys as secondary direct access;
-         *   they are also represented in the symbol system.
+         * - [] remain on the Lily inner keys as bonus direct access; SYM also
+         *   provides them, so the symbol system does not depend on those extras.
          */
         base_layer {
-            display-name = "Gallium";
+            display-name = "QWERTY";
             bindings = <
 &kp GRAVE   &kp N1  &kp N2  &kp N3     &kp N4  &kp N5                                    &kp N6         &kp N7  &kp N8          &kp N9   &kp N0    &kp MINUS
-&kp TAB     &kp B   &kp L   &kp D      &kp C   &kp V                                     &kp J          &kp Y   &kp O           &kp U    &kp COMMA &kp BSLH
-&kp ESCAPE  &kp N   &kp R   &kp T      &kp S   &kp G                                     &kp P          &kp H   &kp A           &kp E    &kp I     &kp FSLH
-&kp LSHFT   &kp X   &kp Q   &kp M      &kp W   &kp Z         &kp LBKT     &kp RBKT       &kp K          &kp F   &kp SQT         &kp SEMI &kp DOT   &kp RSHFT
+&kp TAB     &kp Q   &kp W   &kp E      &kp R   &kp T                                     &kp Y          &kp U   &kp I           &kp O    &kp P     &kp BSLH
+&kp ESCAPE  &kp A   &kp S   &kp D      &kp F   &kp G                                     &kp H          &kp J   &kp K           &kp L    &kp SEMI  &kp FSLH
+&kp LSHFT   &kp Z   &kp X   &kp C      &kp V   &kp B         &kp LBKT     &kp RBKT       &kp N          &kp M   &kp COMMA       &kp DOT  &kp SQT   &kp RSHFT
                             &kp LCTRL  &mo SYM &kp LEFT_ALT  &kp SPACE    &kp BACKSPACE  &kp ENTER       &mo NAV &kp RIGHT_META
             >;
 
@@ -110,27 +69,30 @@
         };
 
         /*
-         * SYM — programming symbols + right-hand numpad.
+         * SYM — Corne-style programmer symbols + right-hand numpad.
          *
-         * Left hand prioritizes common code/Vim symbols. Right hand is a numpad.
-         * $ and % stay on easy top-row positions because they are used regularly
-         * in Vim. Common programming punctuation is kept direct and unshifted.
-         * The two inner Lily keys become {} on this layer, making:
-         *   BASE inner keys = []
-         *   SYM  inner keys = {}
-         * while () are direct on the right home row.
+         * Design borrowed from proven Corne patterns:
+         * - ! @ # $ % live on the left alpha top row (no 1u shift).
+         * - # and * are vertically paired, useful for Vim search navigation.
+         * - -/= and _ are kept direct rather than hidden behind combos.
+         * - Right hand is a memorable numpad.
+         * - Delimiters are symmetric: [] on outer top, {} outer home,
+         *   <> outer bottom, () on the Lily inner keys.
+         * - The physical Lily58 number row is transparent here, so it remains
+         *   usable for digits while SYM is held; SYM never depends on it.
          *
-         * Pair macros occupy otherwise low-value number-row positions.
+         *  [ | !  @  #  $  %                  7  8  9  /  * | ]
+         *  { | ^  &  *  -  =                  4  5  6  +  - | }
+         *  < | ~  `  \  |  _ | (          ) | 1  2  3  0  . | >
          */
-
         symbol_layer {
             display-name = "Symbols";
             bindings = <
-&kp GRAVE   &kp TILDE  &kp EXCL   &kp AT      &kp DOLLAR &kp PRCNT                         &kp CARET      &kp AMPS        &pair_paren    &pair_bracket &pair_brace &pair_angle
-&kp BSLH    &kp PIPE   &kp AMPS   &kp STAR    &kp QMARK  &kp HASH                          &kp N7         &kp N8          &kp N9         &kp FSLH       &kp STAR   &kp MINUS
-&trans      &kp HASH   &kp DQT    &kp SQT     &kp MINUS  &kp EQUAL                         &kp N4         &kp N5          &kp N6         &kp PLUS       &kp LPAR   &kp RPAR
-&trans      &kp LT     &kp GT     &kp UNDER   &kp COLON  &kp SEMI      &kp LBRC   &kp RBRC &kp N1         &kp N2          &kp N3         &kp N0         &kp DOT    &trans
-                               &trans       &trans       &trans        &trans       &trans           &trans           &trans       &trans
+&trans      &trans     &trans     &trans      &trans      &trans                         &trans       &trans      &trans      &trans      &trans     &trans
+&kp LBKT    &kp EXCL   &kp AT    &kp HASH    &kp DOLLAR  &kp PRCNT                      &kp N7       &kp N8      &kp N9      &kp FSLH    &kp STAR  &kp RBKT
+&kp LBRC    &kp CARET  &kp AMPS  &kp STAR    &kp MINUS   &kp EQUAL                      &kp N4       &kp N5      &kp N6      &kp PLUS    &kp MINUS &kp RBRC
+&kp LT      &kp TILDE  &kp GRAVE &kp BSLH    &kp PIPE    &kp UNDER   &kp LPAR  &kp RPAR &kp N1       &kp N2      &kp N3      &kp N0      &kp DOT   &kp GT
+                                &trans      &trans      &trans       &trans      &trans       &trans       &trans      &trans
             >;
 
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN>;
